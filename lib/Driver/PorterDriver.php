@@ -197,7 +197,7 @@ class PorterDriver implements DriverInterface
                         substr($this->word, -2) != 'zz')
                     {
                         $this->word = substr($this->word, 0, -1);
-                    } else if (self::consonantSequences($this->word) == 1 && $this->hasCvcSequence($this->word)) {
+                    } else if (self::consonantSequenceCount($this->word) == 1 && $this->hasCvcSequence($this->word)) {
                         $this->word .= 'e';
                     }
                 }
@@ -375,10 +375,10 @@ class PorterDriver implements DriverInterface
     private function algorithmStep5a(): void
     {
         if (substr($this->word, -1) == 'e') {
-            if (self::consonantSequences(substr($this->word, 0, -1)) > 1) {
+            if (self::consonantSequenceCount(substr($this->word, 0, -1)) > 1) {
                 $this->replace('e', '');
             }
-            elseif (self::consonantSequences(substr($this->word, 0, -1)) == 1 && !$this->hasCvcSequence(substr($this->word, 0, -1))) {
+            elseif (self::consonantSequenceCount(substr($this->word, 0, -1)) == 1 && !$this->hasCvcSequence(substr($this->word, 0, -1))) {
                 $this->replace('e', '');
             }
         }
@@ -389,7 +389,7 @@ class PorterDriver implements DriverInterface
      */
     private function algorithmStep5b(): void
     {
-        if (self::consonantSequences($this->word) > 1 && $this->hasDoubleConsonant($this->word) && substr($this->word, -1) == 'l') {
+        if (self::consonantSequenceCount($this->word) > 1 && $this->hasDoubleConsonant($this->word) && substr($this->word, -1) == 'l') {
             $this->word = substr($this->word, 0, -1);
         }
     }
@@ -414,7 +414,7 @@ class PorterDriver implements DriverInterface
         if (substr($this->word, $searchPosition) == $search) {
             $subString = substr($this->word, 0, $searchPosition);
 
-            if (null === $consonantSeqMin || self::consonantSequences($subString) > $consonantSeqMin) {
+            if (null === $consonantSeqMin || self::consonantSequenceCount($subString) > $consonantSeqMin) {
                 $this->word = $subString . $replace;
             }
 
@@ -437,20 +437,20 @@ class PorterDriver implements DriverInterface
      * <c>vcvc<v>   gives 2
      * <c>vcvcvc<v> gives 3
      *
-     * @param  string $str The string to return the m count for
+     * @param  string $string The string to return the m count for
      * @return int         The m count
      */
-    private static function consonantSequences($str)
+    private static function consonantSequenceCount(string $string): int
     {
         $c = self::REGEX_CONSONANTS;
         $v = self::REGEX_VOWELS;
 
-        $str = preg_replace("#^$c+#", '', $str);
-        $str = preg_replace("#$v+$#", '', $str);
+        $string = preg_replace(sprintf('{^%s+}', self::REGEX_CONSONANTS), '', $string);
+        $string = preg_replace(sprintf('{%s+$}', self::REGEX_VOWELS), '', $string);
 
-        preg_match_all("#($v+$c+)#", $str, $matches);
+        preg_match_all(sprintf('{(?<groups>%s+%s+)}', self::REGEX_VOWELS, self::REGEX_CONSONANTS), $string, $matches);
 
-        return count($matches[1]);
+        return count($matches['groups']);
     }
 
 
