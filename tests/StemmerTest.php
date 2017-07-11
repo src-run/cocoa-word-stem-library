@@ -17,6 +17,7 @@ use SR\Cocoa\Stemmer\Driver\SnowballDriver;
 use SR\Cocoa\Stemmer\Stemmer;
 use SR\Cocoa\Stemmer\Tests\Driver\PorterDriverTest;
 use SR\Cocoa\Stemmer\Tests\Driver\SnowballDriverTest;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 /**
  * @covers \SR\Cocoa\Stemmer\Stemmer
@@ -28,7 +29,9 @@ class StemmerTest extends TestCase
      */
     public static function providePorterData(): \Generator
     {
-        return PorterDriverTest::getVocabularyLoader()->get();
+        foreach (PorterDriverTest::getVocabularyLoader()->get() as $data) {
+            yield $data;
+        }
     }
 
     /**
@@ -66,9 +69,32 @@ class StemmerTest extends TestCase
     /**
      * @return \Generator
      */
+    public static function providePorterSentenceData(): \Generator
+    {
+        $loader = PorterDriverTest::getVocabularyLoader();
+
+        yield [implode(' ', $loader->words()), $loader->stems()];
+    }
+
+    /**
+     * @param string   $sentence
+     * @param string[] $expected
+     *
+     * @dataProvider providePorterSentenceData
+     */
+    public function testPorterSentence(string $sentence, array $expected)
+    {
+        $this->assertSame($expected, static::getPorterStemmer()->stemSentence($sentence));
+    }
+
+    /**
+     * @return \Generator
+     */
     public static function provideSnowballData(): \Generator
     {
-        return SnowballDriverTest::getVocabularyLoader()->get();
+        foreach (SnowballDriverTest::getVocabularyLoader()->get() as $data) {
+            yield $data;
+        }
     }
 
     /**
@@ -79,6 +105,8 @@ class StemmerTest extends TestCase
      */
     public function testSnowball(string $word, string $stem)
     {
+        static::markTestSkipped('Snowball implementation not completed yet!');
+
         $this->assertSame($stem, static::getSnowballStemmer()->stemWord($word));
     }
 
@@ -100,6 +128,8 @@ class StemmerTest extends TestCase
      */
     public function testSnowballList(array $words, array $stems)
     {
+        static::markTestSkipped('Snowball implementation not completed yet!');
+
         $this->assertSame($stems, static::getSnowballStemmer()->stemList($words));
     }
 
@@ -108,7 +138,27 @@ class StemmerTest extends TestCase
      */
     private static function getPorterStemmer(): Stemmer
     {
-        return new Stemmer(new PorterDriver());
+        static $instance;
+
+        if ($instance === null) {
+            $instance = new Stemmer(new PorterDriver());
+        }
+
+        return $instance;
+    }
+
+    /**
+     * @return Stemmer
+     */
+    private static function getPorterCachedStemmer(): Stemmer
+    {
+        static $instance;
+
+        if ($instance === null) {
+            $instance = new Stemmer(new PorterDriver(), new ArrayAdapter());
+        }
+
+        return $instance;
     }
 
     /**
@@ -116,6 +166,26 @@ class StemmerTest extends TestCase
      */
     private static function getSnowballStemmer(): Stemmer
     {
-        return new Stemmer(new SnowballDriver());
+        static $instance;
+
+        if ($instance === null) {
+            $instance = new Stemmer(new SnowballDriver());
+        }
+
+        return $instance;
+    }
+
+    /**
+     * @return Stemmer
+     */
+    private static function getSnowballCachedStemmer(): Stemmer
+    {
+        static $instance;
+
+        if ($instance === null) {
+            $instance = new Stemmer(new SnowballDriver(), new ArrayAdapter());
+        }
+
+        return $instance;
     }
 }

@@ -43,7 +43,7 @@ class Stemmer implements StemmerInterface
      */
     public function stemWord(string $word): string
     {
-        return $this->cache ? $this->askDriverCached($word) : $this->askDriver($word);
+        return $this->cache ? $this->doStemCached($word) : $this->doStemDirect($word);
     }
 
     /**
@@ -59,11 +59,23 @@ class Stemmer implements StemmerInterface
     }
 
     /**
+     * @param string $sentence
+     *
+     * @return string[]
+     */
+    public function stemSentence(string $sentence): array
+    {
+        return array_filter($this->stemList(preg_split('{[\s\r\t\n\f,.]+}', $sentence)), function ($word) {
+            return strlen($word) > 0;
+        });
+    }
+
+    /**
      * @param string $word
      *
      * @return string
      */
-    private function askDriver(string $word): string
+    private function doStemDirect(string $word): string
     {
         return $this->driver->stem($word);
     }
@@ -73,15 +85,25 @@ class Stemmer implements StemmerInterface
      *
      * @return string
      */
-    private function askDriverCached(string $word): string
+    private function doStemCached(string $word): string
     {
-        $item = $this->cache->getItem(sprintf('%s.%s', __CLASS__, strtolower($word)));
+        $item = $this->cache->getItem($this->generateCacheKey($word));
 
         if (!$item->isHit()) {
-            $item->set($this->driver->stem($word));
+            $item->set($this->doStemDirect($word));
             $this->cache->save($item);
         }
 
         return $item->get();
+    }
+
+    /**
+     * @param string $word
+     *
+     * @return string
+     */
+    private function generateCacheKey(string $word): string
+    {
+        return strtolower(sprintf('%s.%s', str_replace('\\', '.', __CLASS__), $word));
     }
 }

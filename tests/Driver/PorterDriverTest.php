@@ -33,7 +33,9 @@ class PorterDriverTest extends TestCase
      */
     public static function provideData(): \Generator
     {
-        return static::getVocabularyLoader()->get();
+        foreach (static::getVocabularyLoader()->get() as $data) {
+            yield $data;
+        }
     }
 
     /**

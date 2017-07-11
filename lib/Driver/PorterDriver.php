@@ -16,17 +16,12 @@ class PorterDriver implements DriverInterface
     /**
      * @var string
      */
-    private const REGEX_VOWELS = '(?:[aeiou]|(?<![aeiou])y)';
+    private const VOWELS_REGEX = '(?:[aeiou]|(?<![aeiou])y)';
 
     /**
      * @var string
      */
-    private const REGEX_CONSONANTS = '(?:[bcdfghjklmnpqrstvwxz]|(?<=[aeiou])y|^y)';
-
-    /**
-     * @var string[]
-     */
-    private const ALGORITHM_STEPS = ['1a', '1b', '1c', '2', '3', '4', '5a', '5b'];
+    private const CONSONANTS_REGEX = '(?:[bcdfghjklmnpqrstvwxz]|(?<=[aeiou])y|^y)';
 
     /**
      * @var string
@@ -40,19 +35,26 @@ class PorterDriver implements DriverInterface
      */
     public function stem(string $word): string
     {
-        if (strlen($this->word = $word) > 2) {
-            foreach (self::ALGORITHM_STEPS as $s) {
-                $this->{sprintf('algorithmStep%s', $s)}();
-            }
+        $this->setWord($word);
+
+        if ($this->length() > 2) {
+            $this->doStep1a();
+            $this->doStep1b();
+            $this->doStep1c();
+            $this->doStep2();
+            $this->doStep3();
+            $this->doStep4();
+            $this->doStep5a();
+            $this->doStep5b();
         }
 
-        return $this->word;
+        return $this->getWord();
     }
 
     /**
      * @return void
      */
-    private function algorithmStep1a(): void
+    private function doStep1a(): void
     {
         if ($this->isEqualTo('s', -1)) {
             $this->runAsLogicalOr(
@@ -67,7 +69,7 @@ class PorterDriver implements DriverInterface
     /**
      * @return void
      */
-    private function algorithmStep1b(): void
+    private function doStep1b(): void
     {
         $hasEndingIng = function () {
             return $this->hasVowel($this->subStr(0, -3)) && $this->replace('ing');
@@ -105,7 +107,7 @@ class PorterDriver implements DriverInterface
     /**
      * @return void
      */
-    private function algorithmStep1c(): void
+    private function doStep1c(): void
     {
         if ($this->isEqualTo('y', -1) && $this->hasVowel($this->subStr(0, -1))) {
             $this->replace('y', 'i');
@@ -115,7 +117,7 @@ class PorterDriver implements DriverInterface
     /**
      * @return void
      */
-    private function algorithmStep2(): void
+    private function doStep2(): void
     {
         switch ($this->subStr(-2, 1)) {
             case 'a':
@@ -180,7 +182,7 @@ class PorterDriver implements DriverInterface
     /**
      * @return void
      */
-    private function algorithmStep3(): void
+    private function doStep3(): void
     {
         switch ($this->subStr(-2, 1)) {
             case 'a':
@@ -215,7 +217,7 @@ class PorterDriver implements DriverInterface
     /**
      * @return void
      */
-    private function algorithmStep4(): void
+    private function doStep4(): void
     {
         switch ($this->subStr(-2, 1)) {
             case 'a':
@@ -289,7 +291,7 @@ class PorterDriver implements DriverInterface
     /**
      * @return void
      */
-    private function algorithmStep5a(): void
+    private function doStep5a(): void
     {
         if ($this->isNotEqualTo('e', -1)) {
             return;
@@ -305,11 +307,27 @@ class PorterDriver implements DriverInterface
     /**
      * @return void
      */
-    private function algorithmStep5b(): void
+    private function doStep5b(): void
     {
         if ($this->isMeasureMultiple() && $this->hasDoubleConsonant() && $this->isEqualTo('l', -1)) {
             $this->applySubStr(0, -1);
         }
+    }
+
+    /**
+     * @param string $word
+     */
+    private function setWord(string $word): void
+    {
+        $this->word = $word;
+    }
+
+    /**
+     * @return string
+     */
+    private function getWord(): string
+    {
+        return $this->word;
     }
 
     /**
@@ -324,14 +342,13 @@ class PorterDriver implements DriverInterface
      */
     private function replace(string $search, string $replace = null, int $consonantSeqMin = null): bool
     {
-        $position = 0 - strlen($search);
         $replace = $replace === null ? '' : $replace;
 
-        if (substr($this->word, $position) == $search) {
-            $subString = substr($this->word, 0, $position);
+        if ($this->subStr($position = 0 - $this->length($search)) === $search) {
+            $subStr = $this->subStr(0, $position);
 
-            if (null === $consonantSeqMin || $this->measure($subString) > $consonantSeqMin) {
-                $this->word = $subString . $replace;
+            if (null === $consonantSeqMin || $this->measure($subStr) > $consonantSeqMin) {
+                $this->setWord($subStr.$replace);
             }
 
             return true;
@@ -341,6 +358,9 @@ class PorterDriver implements DriverInterface
     }
 
     /**
+     * Remove a search string at the end of the active word, optionally limiting action by the
+     * consonant sequence count.
+     *
      * @param string   $search
      * @param int|null $consonantSeqMin
      *
@@ -360,6 +380,16 @@ class PorterDriver implements DriverInterface
     }
 
     /**
+     * @param string|null $string
+     *
+     * @return int
+     */
+    private function length(string $string = null): int
+    {
+        return strlen(null !== $string ? $string : $this->word);
+    }
+
+    /**
      * Returns the number of consonant/vowel sequences found within the string.
      *
      * @param string|null $string
@@ -369,10 +399,10 @@ class PorterDriver implements DriverInterface
     private function measure(string $string = null): int
     {
         $string = null !== $string ? $string : $this->word;
-        $string = preg_replace(sprintf('{^%s+}', self::REGEX_CONSONANTS), '', $string);
-        $string = preg_replace(sprintf('{%s+$}', self::REGEX_VOWELS), '', $string);
+        $string = preg_replace(sprintf('{^%s+}', self::CONSONANTS_REGEX), '', $string);
+        $string = preg_replace(sprintf('{%s+$}', self::VOWELS_REGEX), '', $string);
 
-        preg_match_all(sprintf('{(?<cv>%s+%s+)}', self::REGEX_VOWELS, self::REGEX_CONSONANTS), $string, $matches);
+        preg_match_all(sprintf('{(?<cv>%s+%s+)}', self::VOWELS_REGEX, self::CONSONANTS_REGEX), $string, $matches);
 
         return count($matches['cv'] ?? []);
     }
@@ -404,7 +434,7 @@ class PorterDriver implements DriverInterface
      */
     private function hasDoubleConsonant(): bool
     {
-        if (null === $matches = $this->getMatches(sprintf('{%s{2}$}', self::REGEX_CONSONANTS), $this->word)) {
+        if (null === $matches = $this->getMatches(sprintf('{%s{2}$}', self::CONSONANTS_REGEX), $this->word)) {
             return false;
         }
 
@@ -421,11 +451,11 @@ class PorterDriver implements DriverInterface
     private function hasCvcSequence(string $string = null): bool
     {
         $string = null !== $string ? $string : $this->word;
-        $matches = $this->getMatches(sprintf('{(?<cvc>%1$s%2$s%1$s)$}', self::REGEX_CONSONANTS, self::REGEX_VOWELS), $string);
+        $matches = $this->getMatches(sprintf('{(?<cvc>%1$s%2$s%1$s)$}', self::CONSONANTS_REGEX, self::VOWELS_REGEX), $string);
 
         return $this->runAsLogicalAnd(
             function () use ($matches) { return null !== $matches && isset($matches['cvc']); },
-            function () use ($matches) { return strlen($matches['cvc']) === 3; },
+            function () use ($matches) { return $this->length($matches['cvc']) === 3; },
             function () use ($matches) { return $matches['cvc']{2} !== 'w'; },
             function () use ($matches) { return $matches['cvc']{2} !== 'x'; },
             function () use ($matches) { return $matches['cvc']{2} !== 'y'; }
@@ -439,7 +469,7 @@ class PorterDriver implements DriverInterface
      */
     private function hasVowel(string $string = null): bool
     {
-        return $this->match(sprintf('{%s+}', self::REGEX_VOWELS), null !== $string ? $string : $this->word);
+        return $this->match(sprintf('{%s+}', self::VOWELS_REGEX), null !== $string ? $string : $this->word);
     }
 
     /**

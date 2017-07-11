@@ -82,6 +82,10 @@ final class VocabularyLoader
             throw new InvalidArgumentException('Unable to create array from fetched vocabulary.');
         }
 
-        return $list;
+        return array_filter(array_map(function (string $item) {
+            return trim($item);
+        }, $list), function (string $item) {
+            return strlen($item) > 0;
+        });
     }
 }
