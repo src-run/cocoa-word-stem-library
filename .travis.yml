@@ -11,24 +11,22 @@
 
 sudo     : false
 language : php
-php      : [ 7.0, 7.1, nightly ]
+php      : [ 7.1, nightly ]
 
 git:
   depth : 3
 
 env:
   global:
-    - secure: "ZCLQbQRucUfOgv3b0JpoDLdOz+1kB+7YgsAZ0o9IEYHID/pa/xrkM6mb9hrgNgLnyfE28uSMXd/7FnDO/mq7EgRUYu3zPTh+nHYl+vDyygUBlSeOhBAkArlgLK20NKo/dt2e0nSKI64XXq0TNhWM1jeK9y7YvH5GcLN00rUTzjWytaGCBtqjuLeb6r+fubDTSlu8khfraaATwttnlyuZ1U71PxQF4kmBT09Gh48BEQFlka/vaq6Ytwt3NdCt+HOyR/JKUtUqcwasbNSDt4FsulanI2sLuKHFRdg2zig9Qglx9+QDdhM7f+t45HwARByVJ9QQjGy0qSTyahj5uWQpMJ2Sqr3YQ6ThcECK9qvfOW3O/8lO4IGlqgB85ZFGP4q3ewzU+pOqU8knI5MaAHDLoMFh8eLRB7Tvws6Fexp883VIuY9Q2KJs3AGRkoXz7aIngtVLHRm6M52zVUmaoJHU/tCfxdBWfjANTQNWmYDRLiXaOsXETlHek5wgxtvUIXNsHcqTz92z6iljrkzZ42k/qawUCb0x8rePmUXaND1NWD+ShEVLwDsSKr5WVl2xJ97rVYR247j6abNWRvRO44JnTdjIRWSfBvWt9Tt0aAdtiYvWLW+yJLY/C9umkpd60mTyJ+UbHxhTuygwuD0PSvK0G4qwWZ88OIZFFSDckmMWDVI="
+    - secure: "wHKrzON9nhjMhIO/UceHJM7sUnTbHGTPFuwlipplR/NbxR8oq1c8ASjW3cask7L6v2giDeZhvrXJvCX7uw+OqX0VVtN0anjr+zXIJTv/RyBFX5thkstxcdr1XIDKBtda3MypeyNZj+/Px21UVdSaaWEabjvCRlL8usoen+CRDbncJWcR3ELbFlU5+JGnSrqmWN/fOExtkhvD0s/2Y74wNvZBozQR8KaW4pgRiA/dwUjRgsnKRrT4J6ZMUfxu4tZQCq51UzOnC5HEiYbjcLpUJ2P/Sv2RP6GOT+Kfx28NpfGxOvi+drQbToq3lXY60dFEhZbijYGKG7WqEH5mabfi7zaCSAfcPRxL9Z30CdpjxIG7+Sd9EhubyvLKtGbRuoYV38D1vJorlNYPJi9fzL6SITTDKxVvuHt7097JouR+Zx4Sz1IZFFLa/PqHxKI1cpRNpzE2seS5CrjMSCOzV/M/euDOQuhomVAIirlhj52AKG/55KRmEtJ9tca/pVVmzN6UbRS2lEITP4fxGS0MwwCEr1TlyksRL7de/HrWDkVE9Rj6CyVlNYFbF8HEa5TdN4n9M1A5mDTIoorX7BGqPu0+FWH1GIxUjeuWSo+KFU2OFTnwq/1hLmu/sA6mKuMovfuLhY79DiuTiCrCVLk3OcxlyXG7t1iOwjJiaQz94wohm6c="
 
 install :
-  - bash .bldr/bldr -b up-env -q
-  - bash .bldr/bldr -b up-app -q
+  - bash .bldr/bldr -b up
 
 script :
   - bin/simple-phpunit || bin/phpunit
 
 after_script :
-  - bash .bldr/bldr -b down-app -q
-  - bash .bldr/bldr -b down-env -q
+  - bash .bldr/bldr -b down
 
 ...
