@@ -615,7 +615,7 @@ class PorterDriver implements DriverInterface
      *
      * @return bool
      */
-    private function logicalOr(\Closure ...$closures) : bool
+    private function logicalOr(\Closure ...$closures): bool
     {
         foreach ($closures as $c) {
             if ($c()) {
