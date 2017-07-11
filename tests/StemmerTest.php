@@ -12,12 +12,14 @@
 namespace SR\Cocoa\Stemmer\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Cache\CacheItemPoolInterface;
 use SR\Cocoa\Stemmer\Driver\PorterDriver;
 use SR\Cocoa\Stemmer\Driver\SnowballDriver;
 use SR\Cocoa\Stemmer\Stemmer;
 use SR\Cocoa\Stemmer\Tests\Driver\PorterDriverTest;
 use SR\Cocoa\Stemmer\Tests\Driver\SnowballDriverTest;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\CacheItem;
 
 /**
  * @covers \SR\Cocoa\Stemmer\Stemmer
@@ -87,6 +89,36 @@ class StemmerTest extends TestCase
         $this->assertSame($expected, static::getPorterStemmer()->stemSentence($sentence));
     }
 
+    public function testPorterCachedWithConcrete()
+    {
+        $stemmer = static::getPorterCachedStemmer(new ArrayAdapter());
+
+        for($i = 0; $i < 20; $i++) {
+            $this->assertSame('abhor', $stemmer->stemWord('abhorring'));
+        }
+    }
+
+    public function testPorterCachedWithMock()
+    {
+        $cache = $this->getMockBuilder(ArrayAdapter::class)
+            ->getMock();
+
+        $cache
+            ->expects($this->atLeastOnce())
+            ->method('getItem')
+            ->willReturn(new CacheItem());
+
+        $cache
+            ->expects($this->atLeastOnce())
+            ->method('save');
+
+        $stemmer = static::getPorterCachedStemmer($cache);
+
+        for($i = 0; $i < 20; $i++) {
+            $this->assertSame('abhor', $stemmer->stemWord('abhorring'));
+        }
+    }
+
     /**
      * @return \Generator
      */
@@ -148,17 +180,13 @@ class StemmerTest extends TestCase
     }
 
     /**
+     * @param CacheItemPoolInterface $cache
+     *
      * @return Stemmer
      */
-    private static function getPorterCachedStemmer(): Stemmer
+    private static function getPorterCachedStemmer(CacheItemPoolInterface $cache): Stemmer
     {
-        static $instance;
-
-        if ($instance === null) {
-            $instance = new Stemmer(new PorterDriver(), new ArrayAdapter());
-        }
-
-        return $instance;
+        return new Stemmer(new PorterDriver(), $cache);
     }
 
     /**
