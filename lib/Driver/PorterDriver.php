@@ -51,40 +51,52 @@ class PorterDriver implements DriverInterface
         return $this->getWord();
     }
 
-    /**
-     * @return void
-     */
     private function doStep1a(): void
     {
-        if ($this->isEqualTo('s', -1)) {
-            $this->runAsLogicalOr(
-                function () { return $this->replace('sses', 'ss'); },
-                function () { return $this->replace('ies', 'i'); },
-                function () { return $this->replace('ss', 'ss'); },
-                function () { return $this->remove('s'); }
-            );
+        if ($this->isNotEqualTo('s', -1)) {
+            return;
         }
+
+        $this->logicalOr(
+            function () {
+                return $this->replace('sses', 'ss');
+            },
+            function () {
+                return $this->replace('ies', 'i');
+            },
+            function () {
+                return $this->replace('ss', 'ss');
+            },
+            function () {
+                return $this->remove('s');
+            }
+        );
     }
 
-    /**
-     * @return void
-     */
     private function doStep1b(): void
     {
         $hasEndingIng = function () {
-            return $this->hasVowel($this->subStr(0, -3)) && $this->replace('ing');
+            return $this->hasVowel($this->sub(0, -3)) && $this->replace('ing');
         };
 
         $hasEndingEd = function () {
-            return $this->hasVowel($this->subStr(0, -2)) && $this->replace('ed');
+            return $this->hasVowel($this->sub(0, -2)) && $this->replace('ed');
         };
 
         $hasRemovableDoubleConsonant = function () {
-            return $this->runAsLogicalAnd(
-                function () { return $this->hasDoubleConsonant(); },
-                function () { return $this->isNotEqualTo('ll', -2); },
-                function () { return $this->isNotEqualTo('ss', -2); },
-                function () { return $this->isNotEqualTo('zz', -2); }
+            return $this->logicalAnd(
+                function () {
+                    return $this->hasDoubleConsonant();
+                },
+                function () {
+                    return $this->isNotEqualTo('ll', -2);
+                },
+                function () {
+                    return $this->isNotEqualTo('ss', -2);
+                },
+                function () {
+                    return $this->isNotEqualTo('zz', -2);
+                }
             );
         };
 
@@ -92,10 +104,9 @@ class PorterDriver implements DriverInterface
             if ($hasEndingIng() || $hasEndingEd()) {
                 if (!$this->replace('at', 'ate') &&
                     !$this->replace('bl', 'ble') &&
-                    !$this->replace('iz', 'ize'))
-                {
+                    !$this->replace('iz', 'ize')) {
                     if ($hasRemovableDoubleConsonant()) {
-                        $this->applySubStr(0, -1);
+                        $this->applySub(0, -1);
                     } elseif ($this->isMeasureSingular() && $this->hasCvcSequence()) {
                         $this->append('e');
                     }
@@ -104,33 +115,35 @@ class PorterDriver implements DriverInterface
         }
     }
 
-    /**
-     * @return void
-     */
     private function doStep1c(): void
     {
-        if ($this->isEqualTo('y', -1) && $this->hasVowel($this->subStr(0, -1))) {
+        if ($this->isEqualTo('y', -1) && $this->hasVowel($this->sub(0, -1))) {
             $this->replace('y', 'i');
         }
     }
 
-    /**
-     * @return void
-     */
     private function doStep2(): void
     {
-        switch ($this->subStr(-2, 1)) {
+        switch ($this->sub(-2, 1)) {
             case 'a':
-                $this->runAsLogicalOr(
-                    function () { return $this->replace('ational', 'ate', 0); },
-                    function () { return $this->replace('tional', 'tion', 0); }
+                $this->logicalOr(
+                    function () {
+                        return $this->replace('ational', 'ate', 0);
+                    },
+                    function () {
+                        return $this->replace('tional', 'tion', 0);
+                    }
                 );
                 break;
 
             case 'c':
-                $this->runAsLogicalOr(
-                    function () { return $this->replace('enci', 'ence', 0); },
-                    function () { return $this->replace('anci', 'ance', 0); }
+                $this->logicalOr(
+                    function () {
+                        return $this->replace('enci', 'ence', 0);
+                    },
+                    function () {
+                        return $this->replace('anci', 'ance', 0);
+                    }
                 );
                 break;
 
@@ -143,48 +156,75 @@ class PorterDriver implements DriverInterface
                 break;
 
             case 'l':
-                $this->runAsLogicalOr(
-                    function () { return $this->replace('entli', 'ent', 0); },
-                    function () { return $this->replace('ousli', 'ous', 0); },
-                    function () { return $this->replace('alli', 'al', 0); },
-                    function () { return $this->replace('bli', 'ble', 0); },
-                    function () { return $this->replace('eli', 'e', 0); }
+                $this->logicalOr(
+                    function () {
+                        return $this->replace('entli', 'ent', 0);
+                    },
+                    function () {
+                        return $this->replace('ousli', 'ous', 0);
+                    },
+                    function () {
+                        return $this->replace('alli', 'al', 0);
+                    },
+                    function () {
+                        return $this->replace('bli', 'ble', 0);
+                    },
+                    function () {
+                        return $this->replace('eli', 'e', 0);
+                    }
                 );
                 break;
 
             case 'o':
-                $this->runAsLogicalOr(
-                    function () { return $this->replace('ization', 'ize', 0); },
-                    function () { return $this->replace('ation', 'ate', 0); },
-                    function () { return $this->replace('ator', 'ate', 0); }
+                $this->logicalOr(
+                    function () {
+                        return $this->replace('ization', 'ize', 0);
+                    },
+                    function () {
+                        return $this->replace('ation', 'ate', 0);
+                    },
+                    function () {
+                        return $this->replace('ator', 'ate', 0);
+                    }
                 );
                 break;
 
             case 's':
-                $this->runAsLogicalOr(
-                    function () { return $this->replace('iveness', 'ive', 0); },
-                    function () { return $this->replace('fulness', 'ful', 0); },
-                    function () { return $this->replace('ousness', 'ous', 0); },
-                    function () { return $this->replace('alism', 'al', 0); }
+                $this->logicalOr(
+                    function () {
+                        return $this->replace('iveness', 'ive', 0);
+                    },
+                    function () {
+                        return $this->replace('fulness', 'ful', 0);
+                    },
+                    function () {
+                        return $this->replace('ousness', 'ous', 0);
+                    },
+                    function () {
+                        return $this->replace('alism', 'al', 0);
+                    }
                 );
                 break;
 
             case 't':
-                $this->runAsLogicalOr(
-                    function () { return $this->replace('biliti', 'ble', 0); },
-                    function () { return $this->replace('aliti', 'al', 0); },
-                    function () { return $this->replace('iviti', 'ive', 0); }
+                $this->logicalOr(
+                    function () {
+                        return $this->replace('biliti', 'ble', 0);
+                    },
+                    function () {
+                        return $this->replace('aliti', 'al', 0);
+                    },
+                    function () {
+                        return $this->replace('iviti', 'ive', 0);
+                    }
                 );
                 break;
         }
     }
 
-    /**
-     * @return void
-     */
     private function doStep3(): void
     {
-        switch ($this->subStr(-2, 1)) {
+        switch ($this->sub(-2, 1)) {
             case 'a':
                 $this->replace('ical', 'ic', 0);
                 break;
@@ -194,9 +234,13 @@ class PorterDriver implements DriverInterface
                 break;
 
             case 't':
-                $this->runAsLogicalOr(
-                    function () { return $this->replace('icate', 'ic', 0); },
-                    function () { return $this->replace('iciti', 'ic', 0); }
+                $this->logicalOr(
+                    function () {
+                        return $this->replace('icate', 'ic', 0);
+                    },
+                    function () {
+                        return $this->replace('iciti', 'ic', 0);
+                    }
                 );
                 break;
 
@@ -214,20 +258,21 @@ class PorterDriver implements DriverInterface
         }
     }
 
-    /**
-     * @return void
-     */
     private function doStep4(): void
     {
-        switch ($this->subStr(-2, 1)) {
+        switch ($this->sub(-2, 1)) {
             case 'a':
                 $this->remove('al', 1);
                 break;
 
             case 'c':
-                $this->runAsLogicalOr(
-                    function () { return $this->remove('ance', 1); },
-                    function () { return $this->remove('ence', 1); }
+                $this->logicalOr(
+                    function () {
+                        return $this->remove('ance', 1);
+                    },
+                    function () {
+                        return $this->remove('ence', 1);
+                    }
                 );
                 break;
 
@@ -240,18 +285,30 @@ class PorterDriver implements DriverInterface
                 break;
 
             case 'l':
-                $this->runAsLogicalOr(
-                    function () { return $this->remove('able', 1); },
-                    function () { return $this->remove('ible', 1); }
+                $this->logicalOr(
+                    function () {
+                        return $this->remove('able', 1);
+                    },
+                    function () {
+                        return $this->remove('ible', 1);
+                    }
                 );
                 break;
 
             case 'n':
-                $this->runAsLogicalOr(
-                    function () { return $this->remove('ant', 1); },
-                    function () { return $this->remove('ement', 1); },
-                    function () { return $this->remove('ment', 1); },
-                    function () { return $this->remove('ent', 1); }
+                $this->logicalOr(
+                    function () {
+                        return $this->remove('ant', 1);
+                    },
+                    function () {
+                        return $this->remove('ement', 1);
+                    },
+                    function () {
+                        return $this->remove('ment', 1);
+                    },
+                    function () {
+                        return $this->remove('ent', 1);
+                    }
                 );
                 break;
 
@@ -268,9 +325,13 @@ class PorterDriver implements DriverInterface
                 break;
 
             case 't':
-                $this->runAsLogicalOr(
-                    function () { return $this->remove('ate', 1); },
-                    function () { return $this->remove('iti', 1); }
+                $this->logicalOr(
+                    function () {
+                        return $this->remove('ate', 1);
+                    },
+                    function () {
+                        return $this->remove('iti', 1);
+                    }
                 );
                 break;
 
@@ -288,29 +349,23 @@ class PorterDriver implements DriverInterface
         }
     }
 
-    /**
-     * @return void
-     */
     private function doStep5a(): void
     {
         if ($this->isNotEqualTo('e', -1)) {
             return;
         }
 
-        $string = $this->subStr(0, -1);
+        $string = $this->sub(0, -1);
 
         if ($this->isMeasureMultiple($string) || ($this->isMeasureSingular($string) && !$this->hasCvcSequence($string))) {
             $this->replace('e');
         }
     }
 
-    /**
-     * @return void
-     */
     private function doStep5b(): void
     {
         if ($this->isMeasureMultiple() && $this->hasDoubleConsonant() && $this->isEqualTo('l', -1)) {
-            $this->applySubStr(0, -1);
+            $this->applySub(0, -1);
         }
     }
 
@@ -342,10 +397,10 @@ class PorterDriver implements DriverInterface
      */
     private function replace(string $search, string $replace = null, int $consonantSeqMin = null): bool
     {
-        $replace = $replace === null ? '' : $replace;
+        $replace = $replace !== null ? $replace : '';
 
-        if ($this->subStr($position = 0 - $this->length($search)) === $search) {
-            $subStr = $this->subStr(0, $position);
+        if ($search === $this->sub($position = 0 - $this->length($search))) {
+            $subStr = $this->sub(0, $position);
 
             if (null === $consonantSeqMin || $this->measure($subStr) > $consonantSeqMin) {
                 $this->setWord($subStr.$replace);
@@ -390,6 +445,26 @@ class PorterDriver implements DriverInterface
     }
 
     /**
+     * @param int      $start
+     * @param int|null $length
+     *
+     * @return string
+     */
+    private function sub(int $start, int $length = null): string
+    {
+        return null !== $length ? substr($this->word, $start, $length) : substr($this->word, $start);
+    }
+
+    /**
+     * @param int      $start
+     * @param int|null $length
+     */
+    private function applySub(int $start, int $length = null): void
+    {
+        $this->word = $this->sub($start, $length);
+    }
+
+    /**
      * Returns the number of consonant/vowel sequences found within the string.
      *
      * @param string|null $string
@@ -414,7 +489,7 @@ class PorterDriver implements DriverInterface
      */
     private function isMeasureSingular(string $string = null): bool
     {
-        return $this->measure($string) === 1;
+        return 1 === $this->measure($string);
     }
 
     /**
@@ -424,7 +499,7 @@ class PorterDriver implements DriverInterface
      */
     private function isMeasureMultiple(string $string = null): bool
     {
-        return $this->measure($string) > 1;
+        return 1 < $this->measure($string);
     }
 
     /**
@@ -434,11 +509,11 @@ class PorterDriver implements DriverInterface
      */
     private function hasDoubleConsonant(): bool
     {
-        if (null === $matches = $this->getMatches(sprintf('{%s{2}$}', self::CONSONANTS_REGEX), $this->word)) {
+        if (null === $matches = $this->match(sprintf('{%s{2}$}', self::CONSONANTS_REGEX), $this->word)) {
             return false;
         }
 
-        return $matches[0]{0} === $matches[0]{1};
+        return substr($matches[0], 0, 1) === substr($matches[0], 1, 1);
     }
 
     /**
@@ -451,14 +526,24 @@ class PorterDriver implements DriverInterface
     private function hasCvcSequence(string $string = null): bool
     {
         $string = null !== $string ? $string : $this->word;
-        $matches = $this->getMatches(sprintf('{(?<cvc>%1$s%2$s%1$s)$}', self::CONSONANTS_REGEX, self::VOWELS_REGEX), $string);
+        $matches = $this->match(sprintf('{(?<cvc>%1$s%2$s%1$s)$}', self::CONSONANTS_REGEX, self::VOWELS_REGEX), $string);
 
-        return $this->runAsLogicalAnd(
-            function () use ($matches) { return null !== $matches && isset($matches['cvc']); },
-            function () use ($matches) { return $this->length($matches['cvc']) === 3; },
-            function () use ($matches) { return $matches['cvc']{2} !== 'w'; },
-            function () use ($matches) { return $matches['cvc']{2} !== 'x'; },
-            function () use ($matches) { return $matches['cvc']{2} !== 'y'; }
+        return $this->logicalAnd(
+            function () use ($matches) {
+                return null !== $matches && isset($matches['cvc']);
+            },
+            function () use ($matches) {
+                return 3 === $this->length($matches['cvc']);
+            },
+            function () use ($matches) {
+                return 'w' !== substr($matches['cvc'], 2, 1);
+            },
+            function () use ($matches) {
+                return 'x' !== substr($matches['cvc'], 2, 1);
+            },
+            function () use ($matches) {
+                return 'y' !== substr($matches['cvc'], 2, 1);
+            }
         );
     }
 
@@ -469,29 +554,7 @@ class PorterDriver implements DriverInterface
      */
     private function hasVowel(string $string = null): bool
     {
-        return $this->match(sprintf('{%s+}', self::VOWELS_REGEX), null !== $string ? $string : $this->word);
-    }
-
-    /**
-     * @param int      $start
-     * @param int|null $length
-     *
-     * @return string
-     */
-    private function subStr(int $start, int $length = null): string
-    {
-        return null === $length ? substr($this->word, $start) : substr($this->word, $start, $length);
-    }
-
-    /**
-     * @param int      $start
-     * @param int|null $length
-     *
-     * @return void
-     */
-    private function applySubStr(int $start, int $length = null): void
-    {
-        $this->word = $this->subStr($start, $length);
+        return $this->isMatch(sprintf('{%s+}', self::VOWELS_REGEX), null !== $string ? $string : $this->word);
     }
 
     /**
@@ -503,7 +566,7 @@ class PorterDriver implements DriverInterface
      */
     private function isEqualTo(string $comparison, int $start, int $length = null): bool
     {
-        return $this->subStr($start, $length) === $comparison;
+        return $comparison === $this->sub($start, $length);
     }
 
     /**
@@ -515,7 +578,7 @@ class PorterDriver implements DriverInterface
      */
     private function isNotEqualTo(string $comparison, int $start, int $length = null): bool
     {
-        return $this->subStr($start, $length) !== $comparison;
+        return $comparison !== $this->sub($start, $length);
     }
 
     /**
@@ -525,7 +588,7 @@ class PorterDriver implements DriverInterface
      *
      * @return bool
      */
-    private function match(string $pattern, string $string = null, array &$matches = []): bool
+    private function isMatch(string $pattern, string $string = null, array &$matches = []): bool
     {
         return 1 === preg_match($pattern, null !== $string ? $string : $this->word, $matches) ? true : false;
     }
@@ -536,11 +599,11 @@ class PorterDriver implements DriverInterface
      *
      * @return array|null
      */
-    private function getMatches(string $pattern, string $string = null): ?array
+    private function match(string $pattern, string $string = null): ? array
     {
         $matches = [];
 
-        if ($this->match($pattern, $string, $matches)) {
+        if ($this->isMatch($pattern, $string, $matches)) {
             return $matches;
         }
 
@@ -552,7 +615,7 @@ class PorterDriver implements DriverInterface
      *
      * @return bool
      */
-    private function runAsLogicalOr(\Closure ...$closures): bool
+    private function logicalOr(\Closure ...$closures) : bool
     {
         foreach ($closures as $c) {
             if ($c()) {
@@ -568,7 +631,7 @@ class PorterDriver implements DriverInterface
      *
      * @return bool
      */
-    private function runAsLogicalAnd(\Closure ...$closures): bool
+    private function logicalAnd(\Closure ...$closures): bool
     {
         foreach ($closures as $c) {
             if (!$c()) {
