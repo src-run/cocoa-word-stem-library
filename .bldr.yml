@@ -12,5 +12,5 @@ app_post: ~
 env_post: composer-del,ci-coveralls,ci-codacy
 app_path: ~
 pkg_name: cocoa-word-stem-library
-pkg_desc: "Simple PHP-based word stemmer implementation using the Snowball algorithm."
+pkg_desc: "Simple PHP word stemmer implementation with driver abstraction and Porter driver implementation."
 pkg_bndl: false

@@ -3,7 +3,7 @@
   "license": "MIT",
   "type": "library",
   "homepage": "https://src.run/cocoa-word-stem-library",
-  "description": "Simple PHP-based word stemmer implementation using the Snowball algorithm.",
+  "description": "Simple PHP word stemmer implementation with driver abstraction and Porter driver implementation.",
   "support": {
     "email": "rmf@src.run",
     "issues": "https://src.run/cocoa-word-stem-library/issues",
@@ -21,8 +21,7 @@
   "require": {
     "php": "~7.1",
     "psr/cache": "~1.0",
-    "src-run/augustus-exception-library": "~0.8",
-    "symfony/polyfill-php72": "dev-master"
+    "symfony/polyfill-php72": "~1.5||dev-master"
   },
   "require-dev": {
     "codacy/coverage": "~1.0",

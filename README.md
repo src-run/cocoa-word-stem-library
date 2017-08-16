@@ -11,7 +11,7 @@
 [Welcome](https://src.run/go/readme_welcome)!
 The `src-run/cocoa-word-stem-library` package provides the following
 
-> Simple PHP-based word stemmer implementation using the Snowball algorithm.
+> Simple PHP word stemmer implementation with driver abstraction and Porter driver implementation.
 
 ### Grouping
 
