@@ -57,9 +57,7 @@ class Stemmer implements StemmerInterface
      */
     public function stemArray(array $words): array
     {
-        return array_map(function (string $word) {
-            return $this->stemWord($word);
-        }, $this->sanitizeWords($words));
+        return $this->cache ? $this->processArrayCached($words) : $this->processArrayDirect($words);
     }
 
     /**
@@ -112,11 +110,40 @@ class Stemmer implements StemmerInterface
     }
 
     /**
-     * @param string $word
+     * @param array $words
+     *
+     * @return array
+     */
+    private function processArrayCached(array $words): array
+    {
+        $item = $this->cache->getItem($this->getWordCacheKey($words));
+
+        if (!$item->isHit()) {
+            $item->set($this->processArrayDirect($words));
+            $this->cache->save($item);
+        }
+
+        return $item->get();
+    }
+
+    /**
+     * @param array $words
+     *
+     * @return array
+     */
+    private function processArrayDirect(array $words): array
+    {
+        return array_map(function (string $word) {
+            return $this->stemWord($word);
+        }, $this->sanitizeWords($words));
+    }
+
+    /**
+     * @param string|string[] $context
      *
      * @return string
      */
-    private function getWordCacheKey(string $word): string
+    private function getWordCacheKey($context): string
     {
         static $context;
 
@@ -124,6 +151,6 @@ class Stemmer implements StemmerInterface
             $context = sprintf('sr-word-stem_%s-%s', spl_object_id($this), spl_object_id($this->driver));
         }
 
-        return sprintf('%s_%s', $context, $word);
+        return sprintf('%s_%s', $context, hash('md5', is_array($context) ? implode('-', $context) : $context));
     }
 }
