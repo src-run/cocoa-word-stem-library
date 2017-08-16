@@ -11,7 +11,7 @@
          bootstrap="./vendor/autoload.php">
 
     <testsuites>
-        <testsuite name="src-run/cocoa-stemmer-library">
+        <testsuite name="src-run/cocoa-word-stem-library">
             <directory>tests</directory>
         </testsuite>
     </testsuites>

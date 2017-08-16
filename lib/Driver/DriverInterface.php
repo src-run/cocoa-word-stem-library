@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the `src-run/cocoa-stemmer-library` project.
+ * This file is part of the `src-run/cocoa-word-stem-library` project.
  *
  * (c) Rob Frawley 2nd <rmf@src.run>
  *
@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace SR\Cocoa\Stemmer\Driver;
+namespace SR\Cocoa\Word\Stem\Driver;
 
 interface DriverInterface
 {

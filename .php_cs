@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the `src-run/cocoa-stemmer-library` project.
+ * This file is part of the `src-run/cocoa-word-stem-library` project.
  *
  * (c) Rob Frawley 2nd <rmf@src.run>
  *
@@ -12,7 +12,7 @@
 require __DIR__.'/.bldr/_helpers/php-cs-fixer/config.php';
 
 $options = [
-    'project' => 'src-run/cocoa-stemmer-library',
+    'project' => 'src-run/cocoa-word-stem-library',
     'author'  => 'Rob Frawley 2nd <rmf@src.run>',
     'location' => __DIR__,
 ];

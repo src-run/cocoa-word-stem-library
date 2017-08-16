@@ -1,15 +1,15 @@
 {
-  "name": "src-run/cocoa-stemmer-library",
+  "name": "src-run/cocoa-word-stem-library",
   "license": "MIT",
   "type": "library",
-  "homepage": "https://src.run/cocoa-stemmer-library",
+  "homepage": "https://src.run/cocoa-word-stem-library",
   "description": "Simple PHP-based word stemmer implementation using the Snowball algorithm.",
   "support": {
     "email": "rmf@src.run",
-    "issues": "https://src.run/cocoa-stemmer-library/issues",
-    "source": "https://src.run/cocoa-stemmer-library/git"
+    "issues": "https://src.run/cocoa-word-stem-library/issues",
+    "source": "https://src.run/cocoa-word-stem-library/git"
   },
-  "keywords": [ "cocoa-stemmer-library", "cocoa", "stemmer", "library", "rmf", "src-run" ],
+  "keywords": [ "cocoa-word-stem-library", "cocoa", "stemmer", "library", "rmf", "src-run" ],
   "authors": [
     {
       "name": "Rob Frawley 2nd",
@@ -21,7 +21,8 @@
   "require": {
     "php": "~7.1",
     "psr/cache": "~1.0",
-    "src-run/augustus-exception-library": "~0.8"
+    "src-run/augustus-exception-library": "~0.8",
+    "symfony/polyfill-php72": "dev-master"
   },
   "require-dev": {
     "codacy/coverage": "~1.0",
@@ -33,12 +34,12 @@
   },
   "autoload": {
     "psr-4": {
-      "SR\\Cocoa\\Stemmer\\": "lib/"
+      "SR\\Cocoa\\Word\\Stem\\": "lib/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "SR\\Cocoa\\Stemmer\\Tests\\": "tests/"
+      "SR\\Cocoa\\Word\\Stem\\Tests\\": "tests/"
     }
   },
   "minimum-stability": "dev",

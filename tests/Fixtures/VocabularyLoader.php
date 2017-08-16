@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the `src-run/cocoa-stemmer-library` project.
+ * This file is part of the `src-run/cocoa-word-stem-library` project.
  *
  * (c) Rob Frawley 2nd <rmf@src.run>
  *
@@ -9,9 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace SR\Cocoa\Stemmer\Tests\Fixtures;
+namespace SR\Cocoa\Word\Stem\Tests\Fixtures;
 
 use SR\Exception\Logic\InvalidArgumentException;
+use SR\Exception\Runtime\RuntimeException;
 
 final class VocabularyLoader
 {
@@ -31,6 +32,16 @@ final class VocabularyLoader
     private $path;
 
     /**
+     * @var string[]
+     */
+    private $words = [];
+
+    /**
+     * @var string[]
+     */
+    private $stems = [];
+
+    /**
      * @param string $path
      */
     public function __construct(string $path)
@@ -41,38 +52,128 @@ final class VocabularyLoader
     /**
      * @return string[]
      */
-    public function words(): array
+    public function getWords(): array
     {
-        return $this->fetchVocabularyList(static::$wordFile);
+        return $this->lazyInitialize()->words;
     }
 
     /**
      * @return string[]
      */
-    public function stems(): array
+    public function getStems(): array
     {
-        return $this->fetchVocabularyList(static::$stemFile);
+        return $this->lazyInitialize()->stems;
     }
 
     /**
      * @return \Generator
      */
-    public function get(): \Generator
+    public function getExpectations(): \Generator
     {
-        $words = $this->words();
-        $stems = $this->stems();
+        $size = count($this->lazyInitialize()->words);
 
-        for ($i = 0; $i < count($words); $i++) {
-            yield [$words[$i], $stems[$i]];
+        for ($i = 0; $i < $size; $i++) {
+            yield $this->words[$i] => $this->stems[$i];
         }
+    }
+
+    /**
+     * @return \Generator
+     */
+    public function getExpectationsSubset(): \Generator
+    {
+        list($words, $stems) = $this->getExpectationsSubsetArray();
+        $size = count($words);
+
+        for ($i = 0; $i < $size; $i++) {
+            yield $words[$i] => $stems[$i];
+        }
+    }
+
+    /**
+     * @return array[]
+     */
+    public function getExpectationsSubsetArray(): array
+    {
+        $words = $this->lazyInitialize()->words;
+        $stems = $this->stems;
+
+        $this->assignRandomSubset($words, $stems, 1, 20);
+
+        return [$words, $stems];
+    }
+
+    /**
+     * @return self
+     */
+    private function lazyInitialize(): self
+    {
+        if (empty($this->words)) {
+            $this->words = $this->getListing(static::$wordFile);
+            $this->stems = $this->getListing(static::$stemFile);
+
+            if (count($this->words) !== count($this->stems)) {
+                throw new RuntimeException('Number of words does not match number of stems!');
+            }
+
+            if (getenv('STEM_TEST_COMPREHENSIVE') === false) {
+                $this->assignRandomSubset($this->words, $this->stems, 10, 50);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string[] $words
+     * @param string[] $stems
+     * @param int      $randomMin
+     * @param int      $randomMax
+     */
+    private function assignRandomSubset(array &$words, array &$stems, int $randomMin, int $randomMax): void
+    {
+        $c = count($words);
+        $w = $s = [];
+
+        for ($i = mt_rand(0, $randomMax); $i < $c; $i += mt_rand($randomMin, $randomMax)) {
+            $w[] = $words[$i];
+            $s[] = $stems[$i];
+        }
+
+        $words = $w;
+        $stems = $s;
     }
 
     /**
      * @param string $file
      *
-     * @return string[]
+     * @return array
      */
-    private function fetchVocabularyList(string $file): array
+    private function getListing(string $file): array
+    {
+        return $this->sanitizeListing($this->fetchListing($file));
+    }
+
+    /**
+     * @param array $entries
+     *
+     * @return array
+     */
+    private function sanitizeListing(array $entries): array
+    {
+        return array_values(array_filter(array_map(function (string $w) {
+            return trim($w);
+        }, $entries), function (string $w) {
+            return strlen($w) > 0;
+        }));
+    }
+
+    /**
+     * @param string $file
+     *
+     * @return array
+     */
+    private function fetchListing(string $file): array
     {
         if (false === $contents = file_get_contents(sprintf('%s/%s', $this->path, $file))) {
             throw new InvalidArgumentException(sprintf('Unable to fetch vocabulary file "%s" from "%s".', $file, $this->path));
@@ -82,10 +183,6 @@ final class VocabularyLoader
             throw new InvalidArgumentException('Unable to create array from fetched vocabulary.');
         }
 
-        return array_filter(array_map(function (string $item) {
-            return trim($item);
-        }, $list), function (string $item) {
-            return strlen($item) > 0;
-        });
+        return $list;
     }
 }
