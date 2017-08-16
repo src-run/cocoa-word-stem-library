@@ -134,6 +134,7 @@ class PorterDriver implements DriverInterface
                         return $this->replace('tional', 'tion', 0);
                     }
                 );
+
                 break;
 
             case 'c':
@@ -145,14 +146,17 @@ class PorterDriver implements DriverInterface
                         return $this->replace('anci', 'ance', 0);
                     }
                 );
+
                 break;
 
             case 'e':
                 $this->replace('izer', 'ize', 0);
+
                 break;
 
             case 'g':
                 $this->replace('logi', 'log', 0);
+
                 break;
 
             case 'l':
@@ -173,6 +177,7 @@ class PorterDriver implements DriverInterface
                         return $this->replace('eli', 'e', 0);
                     }
                 );
+
                 break;
 
             case 'o':
@@ -187,6 +192,7 @@ class PorterDriver implements DriverInterface
                         return $this->replace('ator', 'ate', 0);
                     }
                 );
+
                 break;
 
             case 's':
@@ -204,6 +210,7 @@ class PorterDriver implements DriverInterface
                         return $this->replace('alism', 'al', 0);
                     }
                 );
+
                 break;
 
             case 't':
@@ -218,6 +225,7 @@ class PorterDriver implements DriverInterface
                         return $this->replace('iviti', 'ive', 0);
                     }
                 );
+
                 break;
         }
     }
@@ -227,10 +235,12 @@ class PorterDriver implements DriverInterface
         switch ($this->sub(-2, 1)) {
             case 'a':
                 $this->replace('ical', 'ic', 0);
+
                 break;
 
             case 's':
                 $this->remove('ness', 0);
+
                 break;
 
             case 't':
@@ -242,18 +252,22 @@ class PorterDriver implements DriverInterface
                         return $this->replace('iciti', 'ic', 0);
                     }
                 );
+
                 break;
 
             case 'u':
                 $this->remove('ful', 0);
+
                 break;
 
             case 'v':
                 $this->remove('ative', 0);
+
                 break;
 
             case 'z':
                 $this->replace('alize', 'al', 0);
+
                 break;
         }
     }
@@ -263,6 +277,7 @@ class PorterDriver implements DriverInterface
         switch ($this->sub(-2, 1)) {
             case 'a':
                 $this->remove('al', 1);
+
                 break;
 
             case 'c':
@@ -274,14 +289,17 @@ class PorterDriver implements DriverInterface
                         return $this->remove('ence', 1);
                     }
                 );
+
                 break;
 
             case 'e':
                 $this->remove('er', 1);
+
                 break;
 
             case 'i':
                 $this->remove('ic', 1);
+
                 break;
 
             case 'l':
@@ -293,6 +311,7 @@ class PorterDriver implements DriverInterface
                         return $this->remove('ible', 1);
                     }
                 );
+
                 break;
 
             case 'n':
@@ -310,6 +329,7 @@ class PorterDriver implements DriverInterface
                         return $this->remove('ent', 1);
                     }
                 );
+
                 break;
 
             case 'o':
@@ -318,10 +338,12 @@ class PorterDriver implements DriverInterface
                 } else {
                     $this->remove('ou', 1);
                 }
+
                 break;
 
             case 's':
                 $this->remove('ism', 1);
+
                 break;
 
             case 't':
@@ -333,18 +355,22 @@ class PorterDriver implements DriverInterface
                         return $this->remove('iti', 1);
                     }
                 );
+
                 break;
 
             case 'u':
                 $this->remove('ous', 1);
+
                 break;
 
             case 'v':
                 $this->remove('ive', 1);
+
                 break;
 
             case 'z':
                 $this->remove('ize', 1);
+
                 break;
         }
     }
@@ -615,7 +641,7 @@ class PorterDriver implements DriverInterface
      *
      * @return bool
      */
-    private function logicalOr(\Closure ...$closures) : bool
+    private function logicalOr(\Closure ...$closures): bool
     {
         foreach ($closures as $c) {
             if ($c()) {

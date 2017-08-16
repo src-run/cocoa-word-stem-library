@@ -13,7 +13,6 @@ namespace SR\Cocoa\Word\Stem;
 
 use Psr\Cache\CacheItemPoolInterface;
 use SR\Cocoa\Word\Stem\Driver\DriverInterface;
-use SR\Cocoa\Word\Stem\Driver\PorterDriver;
 
 class Stemmer implements StemmerInterface
 {
@@ -28,7 +27,7 @@ class Stemmer implements StemmerInterface
     private $cache;
 
     /**
-     * @param DriverInterface            $driver
+     * @param DriverInterface             $driver
      * @param CacheItemPoolInterface|null $cache
      */
     public function __construct(DriverInterface $driver, CacheItemPoolInterface $cache = null)
