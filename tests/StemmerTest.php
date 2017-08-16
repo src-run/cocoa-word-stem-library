@@ -142,6 +142,46 @@ class StemmerTest extends TestCase
      * @param string   $sentence
      * @param string[] $stems
      */
+    public function testStemSentenceWithCache(string $sentence, array $stems)
+    {
+        $driver = $this
+            ->getMockBuilder(DriverInterface::class)
+            ->getMock();
+
+        foreach (preg_split('{[\s\r\t\n\f,.]+}', $sentence) as $i => $s) {
+            $driver
+                ->expects($this->at($i))
+                ->method('stem')
+                ->with($s)
+                ->willReturn($stems[$i]);
+        }
+
+        $cache = $this
+            ->getMockBuilder(ArrayAdapter::class)
+            ->getMock();
+
+        $cache
+            ->expects($this->atLeastOnce())
+            ->method('getItem')
+            ->willReturn(new CacheItem());
+
+        $cache
+            ->expects($this->atLeastOnce())
+            ->method('save');
+
+        $stemmer = static::getStemmer($driver, $cache);
+
+        $this->assertSame($stems, $stemmer->stemSentence($sentence));
+    }
+
+    /**
+     * @group stemmer-sentence
+     *
+     * @dataProvider provideStemSentenceData
+     *
+     * @param string   $sentence
+     * @param string[] $stems
+     */
     public function testStemAsSentence(string $sentence, array $stems)
     {
         $driver = $this->getDriverMockForStemMultiple(explode(' ', $sentence), $stems);

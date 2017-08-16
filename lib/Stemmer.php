@@ -116,7 +116,7 @@ class Stemmer implements StemmerInterface
      */
     private function processArrayCached(array $words): array
     {
-        $item = $this->cache->getItem($this->getWordCacheKey($words));
+        $item = $this->cache->getItem($this->getWordCacheKey(...$words));
 
         if (!$item->isHit()) {
             $item->set($this->processArrayDirect($words));
@@ -139,11 +139,11 @@ class Stemmer implements StemmerInterface
     }
 
     /**
-     * @param string|string[] $context
+     * @param string[] ...$words
      *
      * @return string
      */
-    private function getWordCacheKey($context): string
+    private function getWordCacheKey(string ...$words): string
     {
         static $context;
 
@@ -151,6 +151,6 @@ class Stemmer implements StemmerInterface
             $context = sprintf('sr-word-stem_%s-%s', spl_object_id($this), spl_object_id($this->driver));
         }
 
-        return sprintf('%s_%s', $context, hash('md5', is_array($context) ? implode('-', $context) : $context));
+        return sprintf('%s_%s', $context, hash('sha256', implode('-', $words)));
     }
 }
